@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, ChatInputCommandInteraction } from 'discord.js';
+import { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, ChatInputCommandInteraction, EmbedBuilder, ActivityType } from 'discord.js';
 import { storage } from './storage';
 
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -87,6 +87,10 @@ const commands = [
         .setDescription('Order description')
         .setRequired(false)
     ),
+
+  new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Display available commands and how to use GameBank'),
 ];
 
 // Register slash commands
@@ -149,9 +153,20 @@ async function handleBalanceCommand(interaction: ChatInputCommandInteraction) {
     response: `Balance: $${user.balance}`,
   });
 
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle('💰 Account Balance')
+    .setDescription(`**${targetUser.username}**'s current balance`)
+    .addFields([
+      { name: 'Current Balance', value: `$${user.balance}`, inline: true },
+      { name: 'Account Status', value: parseFloat(user.balance) > 50 ? '✅ Active' : '⚠️ Low Balance', inline: true },
+    ])
+    .setFooter({ text: 'GameBank • Use /merchants to see available stores' })
+    .setTimestamp();
+
   await interaction.reply({
-    content: `💰 **Balance for ${targetUser.username}**: $${user.balance}`,
-    ephemeral: true,
+    embeds: [embed],
+    flags: 64, // EPHEMERAL flag
   });
 }
 
@@ -186,16 +201,24 @@ async function handleTransactionCommand(interaction: ChatInputCommandInteraction
     failed: '⚠️',
   }[transaction.status] || '❓';
 
+  const embed = new EmbedBuilder()
+    .setColor(transaction.status === 'completed' ? 0x00D166 : transaction.status === 'failed' ? 0xED4245 : 0xFEE75C)
+    .setTitle('📋 Transaction Details')
+    .setDescription(`Transaction ID: \`${transaction.transactionId}\``)
+    .addFields([
+      { name: '👤 User', value: transactionUser?.username || 'Unknown', inline: true },
+      { name: '🏪 Merchant', value: merchant?.name || 'Unknown', inline: true },
+      { name: '💰 Amount', value: `$${transaction.amount}`, inline: true },
+      { name: '📊 Status', value: `${statusEmoji} ${transaction.status}`, inline: true },
+      { name: '📝 Description', value: transaction.description || 'N/A', inline: true },
+      { name: '🕒 Created', value: timeAgo(transaction.createdAt), inline: true },
+    ])
+    .setFooter({ text: 'GameBank • Transaction tracking system' })
+    .setTimestamp();
+
   await interaction.reply({
-    content: `📋 **Transaction Details**\n` +
-            `**ID**: \`${transaction.transactionId}\`\n` +
-            `**User**: ${transactionUser?.username || 'Unknown'}\n` +
-            `**Merchant**: ${merchant?.name || 'Unknown'}\n` +
-            `**Amount**: $${transaction.amount}\n` +
-            `**Status**: ${statusEmoji} ${transaction.status}\n` +
-            `**Description**: ${transaction.description || 'N/A'}\n` +
-            `**Created**: ${timeAgo(transaction.createdAt)}`,
-    ephemeral: true,
+    embeds: [embed],
+    flags: 64, // EPHEMERAL flag
   });
 }
 
@@ -214,15 +237,27 @@ async function handleHistoryCommand(interaction: ChatInputCommandInteraction) {
   });
 
   if (transactions.length === 0) {
+    const embed = new EmbedBuilder()
+      .setColor(0x747F8D)
+      .setTitle('📝 Transaction History')
+      .setDescription(`No transaction history found for **${targetUser.username}**.`)
+      .setFooter({ text: 'GameBank • Start making transactions to see your history!' })
+      .setTimestamp();
+
     await interaction.reply({
-      content: `📝 No transaction history found for ${targetUser.username}.`,
-      ephemeral: true,
+      embeds: [embed],
+      flags: 64, // EPHEMERAL flag
     });
     return;
   }
 
-  let response = `📝 **Transaction History for ${targetUser.username}**\n\n`;
-  
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle('📝 Transaction History')
+    .setDescription(`Recent transactions for **${targetUser.username}**`)
+    .setFooter({ text: `GameBank • Showing ${transactions.length} most recent transactions` })
+    .setTimestamp();
+
   for (const transaction of transactions) {
     const merchant = await storage.getMerchant(transaction.merchantId);
     const statusEmoji = {
@@ -232,12 +267,16 @@ async function handleHistoryCommand(interaction: ChatInputCommandInteraction) {
       failed: '⚠️',
     }[transaction.status] || '❓';
 
-    response += `${statusEmoji} \`${transaction.transactionId}\` - ${merchant?.name || 'Unknown'} - $${transaction.amount} - ${timeAgo(transaction.createdAt)}\n`;
+    embed.addFields([{
+      name: `${statusEmoji} ${transaction.transactionId}`,
+      value: `**${merchant?.name || 'Unknown'}** • $${transaction.amount}\n*${timeAgo(transaction.createdAt)}*`,
+      inline: false
+    }]);
   }
 
   await interaction.reply({
-    content: response,
-    ephemeral: true,
+    embeds: [embed],
+    flags: 64, // EPHEMERAL flag
   });
 }
 
@@ -261,25 +300,30 @@ async function handleMerchantsCommand(interaction: ChatInputCommandInteraction) 
     return;
   }
 
-  let response = '🏪 **Available Merchants**\n\n';
-  
+  const embed = new EmbedBuilder()
+    .setColor(0x00D166)
+    .setTitle('🏪 Available Merchants')
+    .setDescription('Choose from our verified gaming merchants')
+    .setFooter({ text: 'GameBank • Use /order <merchant> <amount> to make a purchase' })
+    .setTimestamp();
+
   activeMerchants.forEach(merchant => {
     const categoryEmoji = {
       food: '🍔',
-      items: '🎮',
+      items: '🎮', 
       services: '🛠️',
     }[merchant.category] || '🏪';
     
-    response += `${categoryEmoji} **${merchant.name}** (${merchant.category})\n`;
-    if (merchant.description) {
-      response += `   ${merchant.description}\n`;
-    }
-    response += '\n';
+    embed.addFields([{
+      name: `${categoryEmoji} ${merchant.name}`,
+      value: `${merchant.description}\nCategory: ${merchant.category}`,
+      inline: true
+    }]);
   });
 
   await interaction.reply({
-    content: response,
-    ephemeral: true,
+    embeds: [embed],
+    flags: 64, // EPHEMERAL flag
   });
 }
 
@@ -430,6 +474,46 @@ async function handleOrderCommand(interaction: ChatInputCommandInteraction) {
   });
 }
 
+async function handleHelpCommand(interaction: ChatInputCommandInteraction) {
+  const user = await ensureUser(interaction.user);
+  
+  await storage.createBotCommand({
+    commandName: 'help',
+    userId: user.id,
+    parameters: null,
+    response: 'Displayed help information',
+  });
+
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle('🏦 GameBank Commands')
+    .setDescription('Your virtual banking solution for gaming communities')
+    .addFields([
+      {
+        name: '💰 Balance & Transactions',
+        value: '`/balance` - Check your current balance\n`/history` - View transaction history\n`/transaction <id>` - Check specific transaction',
+        inline: false
+      },
+      {
+        name: '🏪 Shopping & Payments',
+        value: '`/merchants` - Browse available stores\n`/order <merchant> <amount>` - Make a purchase\n`/pay <user> <amount>` - Send money to friends',
+        inline: false
+      },
+      {
+        name: '🎮 Getting Started',
+        value: 'New users start with $100 balance!\nUse `/merchants` to see available stores\nAll transactions are tracked and secure',
+        inline: false
+      }
+    ])
+    .setFooter({ text: 'GameBank • Professional gaming banking since 2025' })
+    .setTimestamp();
+
+  await interaction.reply({
+    embeds: [embed],
+    flags: 64, // EPHEMERAL flag
+  });
+}
+
 async function ensureUser(discordUser: any) {
   let user = await storage.getUserByDiscordId(discordUser.id);
   
@@ -447,6 +531,23 @@ async function ensureUser(discordUser: any) {
 // Event handlers
 client.once('ready', () => {
   console.log(`Discord bot logged in as ${client.user?.tag}!`);
+  
+  // Set bot activity and status
+  client.user?.setPresence({
+    activities: [{
+      name: 'Banking Transactions 🏦',
+      type: ActivityType.Watching,
+    }],
+    status: 'online',
+  });
+  
+  // Update activity periodically
+  setInterval(async () => {
+    const stats = await storage.getTotalTransactionCount();
+    client.user?.setActivity(`${stats} transactions | /help`, { 
+      type: ActivityType.Watching 
+    });
+  }, 300000); // Update every 5 minutes
 });
 
 client.on('interactionCreate', async interaction => {
@@ -474,10 +575,13 @@ client.on('interactionCreate', async interaction => {
       case 'order':
         await handleOrderCommand(interaction);
         break;
+      case 'help':
+        await handleHelpCommand(interaction);
+        break;
       default:
         await interaction.reply({
           content: '❌ Unknown command.',
-          ephemeral: true,
+          flags: 64, // EPHEMERAL flag
         });
     }
   } catch (error) {
