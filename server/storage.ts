@@ -85,9 +85,69 @@ export class MemStorage implements IStorage {
       const newMerchant: Merchant = {
         ...merchant,
         id,
+        description: merchant.description,
+        isActive: merchant.isActive,
         createdAt: new Date(),
       };
       this.merchants.set(id, newMerchant);
+    });
+
+    // Add some demo users and transactions for testing
+    const demoUsers = [
+      { discordId: "123456789012345678", username: "TestPlayer1", balance: "150.00" },
+      { discordId: "234567890123456789", username: "GameMaster", balance: "2500.75" },
+      { discordId: "345678901234567890", username: "ProGamer", balance: "89.25" },
+    ];
+
+    demoUsers.forEach(userData => {
+      const id = this.currentUserId++;
+      const user: User = {
+        ...userData,
+        id,
+        createdAt: new Date(),
+      };
+      this.users.set(id, user);
+    });
+
+    // Add some demo transactions
+    const demoTransactions = [
+      {
+        transactionId: "TX123456",
+        userId: 1,
+        merchantId: 1,
+        amount: "25.99",
+        status: "completed",
+        description: "Big Mac Combo with fries",
+      },
+      {
+        transactionId: "TX123457",
+        userId: 2,
+        merchantId: 2,
+        amount: "18.50",
+        status: "completed",
+        description: "Large Pepperoni Pizza",
+      },
+      {
+        transactionId: "TX123458",
+        userId: 1,
+        merchantId: 3,
+        amount: "59.99",
+        status: "pending",
+        description: "Gaming headset",
+      },
+    ];
+
+    demoTransactions.forEach(txData => {
+      const id = this.currentTransactionId++;
+      const now = new Date();
+      const transaction: Transaction = {
+        ...txData,
+        id,
+        description: txData.description,
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.transactions.set(id, transaction);
     });
   }
 

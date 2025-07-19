@@ -452,6 +452,8 @@ client.once('ready', () => {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
+  console.log(`Received command: ${interaction.commandName} from user: ${interaction.user.username}`);
+
   try {
     switch (interaction.commandName) {
       case 'balance':
