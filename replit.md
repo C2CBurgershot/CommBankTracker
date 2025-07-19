@@ -26,9 +26,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Architecture
 - **ORM**: Drizzle ORM with Drizzle Kit for migrations
-- **Database**: PostgreSQL (configured for Neon serverless)
+- **Database**: PostgreSQL with persistent data storage
 - **Schema Management**: Type-safe schema definitions with Zod validation
 - **Connection**: Neon serverless driver for production deployment
+- **Storage**: DatabaseStorage class replacing in-memory storage for production use
 
 ## Key Components
 

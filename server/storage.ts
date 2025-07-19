@@ -6,6 +6,8 @@ import {
   type BotCommand, type InsertBotCommand,
   type Alert, type InsertAlert
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -349,4 +351,244 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByDiscordId(discordId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.discordId, discordId));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        balance: insertUser.balance || "100.00", // Default starting balance
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUserBalance(id: number, balance: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ balance })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  // Merchants
+  async getMerchant(id: number): Promise<Merchant | undefined> {
+    const [merchant] = await db.select().from(merchants).where(eq(merchants.id, id));
+    return merchant || undefined;
+  }
+
+  async getMerchantByName(name: string): Promise<Merchant | undefined> {
+    const [merchant] = await db.select().from(merchants).where(eq(merchants.name, name));
+    return merchant || undefined;
+  }
+
+  async createMerchant(insertMerchant: InsertMerchant): Promise<Merchant> {
+    const [merchant] = await db
+      .insert(merchants)
+      .values(insertMerchant)
+      .returning();
+    return merchant;
+  }
+
+  async getAllMerchants(): Promise<Merchant[]> {
+    return await db.select().from(merchants).orderBy(merchants.name);
+  }
+
+  async getTopMerchants(): Promise<Array<Merchant & { totalRevenue: string; orderCount: number }>> {
+    const result = await db
+      .select({
+        id: merchants.id,
+        name: merchants.name,
+        category: merchants.category,
+        description: merchants.description,
+        isActive: merchants.isActive,
+        createdAt: merchants.createdAt,
+        totalRevenue: sql<string>`COALESCE(SUM(CASE WHEN ${transactions.status} = 'completed' THEN ${transactions.amount}::numeric ELSE 0 END), 0)::text`,
+        orderCount: sql<number>`COUNT(CASE WHEN ${transactions.status} = 'completed' THEN 1 END)::int`,
+      })
+      .from(merchants)
+      .leftJoin(transactions, eq(merchants.id, transactions.merchantId))
+      .groupBy(merchants.id)
+      .orderBy(sql`SUM(CASE WHEN ${transactions.status} = 'completed' THEN ${transactions.amount}::numeric ELSE 0 END) DESC`);
+
+    return result;
+  }
+
+  // Transactions
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return transaction || undefined;
+  }
+
+  async getTransactionByTransactionId(transactionId: string): Promise<Transaction | undefined> {
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.transactionId, transactionId));
+    return transaction || undefined;
+  }
+
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    const [transaction] = await db
+      .insert(transactions)
+      .values(insertTransaction)
+      .returning();
+    return transaction;
+  }
+
+  async updateTransactionStatus(id: number, status: string): Promise<Transaction | undefined> {
+    const [transaction] = await db
+      .update(transactions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(transactions.id, id))
+      .returning();
+    return transaction || undefined;
+  }
+
+  async getTransactionsByUserId(userId: number, limit = 10): Promise<Transaction[]> {
+    return await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.createdAt))
+      .limit(limit);
+  }
+
+  async getRecentTransactions(limit = 10): Promise<Array<Transaction & { user: User; merchant: Merchant }>> {
+    const result = await db
+      .select({
+        id: transactions.id,
+        transactionId: transactions.transactionId,
+        userId: transactions.userId,
+        merchantId: transactions.merchantId,
+        amount: transactions.amount,
+        status: transactions.status,
+        description: transactions.description,
+        createdAt: transactions.createdAt,
+        updatedAt: transactions.updatedAt,
+        user: users,
+        merchant: merchants,
+      })
+      .from(transactions)
+      .innerJoin(users, eq(transactions.userId, users.id))
+      .innerJoin(merchants, eq(transactions.merchantId, merchants.id))
+      .orderBy(desc(transactions.createdAt))
+      .limit(limit);
+
+    return result.map(row => ({
+      id: row.id,
+      transactionId: row.transactionId,
+      userId: row.userId,
+      merchantId: row.merchantId,
+      amount: row.amount,
+      status: row.status,
+      description: row.description,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      user: row.user,
+      merchant: row.merchant,
+    }));
+  }
+
+  async getTotalVolume(): Promise<string> {
+    const [result] = await db
+      .select({
+        total: sql<string>`COALESCE(SUM(${transactions.amount}::numeric), 0)::text`,
+      })
+      .from(transactions)
+      .where(eq(transactions.status, 'completed'));
+    
+    return result?.total || "0.00";
+  }
+
+  async getTotalTransactionCount(): Promise<number> {
+    const [result] = await db
+      .select({
+        count: sql<number>`COUNT(*)::int`,
+      })
+      .from(transactions);
+    
+    return result?.count || 0;
+  }
+
+  async getFailedTransactionsToday(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const [result] = await db
+      .select({
+        count: sql<number>`COUNT(*)::int`,
+      })
+      .from(transactions)
+      .where(and(
+        eq(transactions.status, 'failed'),
+        gte(transactions.createdAt, today)
+      ));
+    
+    return result?.count || 0;
+  }
+
+  // Bot Commands
+  async createBotCommand(insertCommand: InsertBotCommand): Promise<BotCommand> {
+    const [command] = await db
+      .insert(botCommands)
+      .values(insertCommand)
+      .returning();
+    return command;
+  }
+
+  async getCommandsToday(): Promise<number> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const [result] = await db
+      .select({
+        count: sql<number>`COUNT(*)::int`,
+      })
+      .from(botCommands)
+      .where(gte(botCommands.executedAt, today));
+    
+    return result?.count || 0;
+  }
+
+  // Alerts
+  async createAlert(insertAlert: InsertAlert): Promise<Alert> {
+    const [alert] = await db
+      .insert(alerts)
+      .values(insertAlert)
+      .returning();
+    return alert;
+  }
+
+  async getUnreadAlerts(): Promise<Alert[]> {
+    return await db
+      .select()
+      .from(alerts)
+      .where(eq(alerts.isRead, false))
+      .orderBy(desc(alerts.createdAt));
+  }
+
+  async markAlertAsRead(id: number): Promise<Alert | undefined> {
+    const [alert] = await db
+      .update(alerts)
+      .set({ isRead: true })
+      .where(eq(alerts.id, id))
+      .returning();
+    return alert || undefined;
+  }
+}
+
+export const storage = new DatabaseStorage();
