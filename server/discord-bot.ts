@@ -635,11 +635,12 @@ client.once("ready", () => {
   // Update activity periodically
   setInterval(async () => {
     const stats = await storage.getTotalTransactionCount();
-    client.user?.setActivity(`${stats} transaction | /help`, {
+    const label = stats === 1 ? "transaction" : "transactions";
+
+    client.user?.setActivity(`${stats} ${label} | /help`, {
       type: ActivityType.Watching,
     });
   }, 300000); // Update every 5 minutes
-});
 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
