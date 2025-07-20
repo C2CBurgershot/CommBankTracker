@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   Wallet,
   Store,
+  HelpCircle,
   Terminal,
   Settings,
   Circle,
@@ -17,6 +18,7 @@ const navigation = [
   { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
   { name: "Balances", href: "/balances", icon: Wallet },
   { name: "Merchants", href: "/merchants", icon: Store },
+  { name: "Help", href: "/help", icon: Terminal },
   { name: "Commands", href: "/commands", icon: Terminal },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
