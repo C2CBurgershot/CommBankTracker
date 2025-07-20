@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   Wallet,
   Store,
+  HelpCircle,
   Terminal,
   Settings,
   Circle,

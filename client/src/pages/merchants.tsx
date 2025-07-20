@@ -40,12 +40,10 @@ import { Store, Utensils, Gamepad, Coffee, MoreVertical } from "lucide-react";
 
 function getMerchantIcon(category: string) {
   switch (category) {
-    case "food":
+    case "main":
       return Utensils;
-    case "items":
+    case "indepent":
       return Gamepad;
-    case "services":
-      return Coffee;
     default:
       return Store;
   }
@@ -53,12 +51,10 @@ function getMerchantIcon(category: string) {
 
 function getMerchantIconColor(category: string) {
   switch (category) {
-    case "food":
+    case "main":
       return "bg-green-500/20 text-green-500";
     case "items":
       return "bg-blue-500/20 text-blue-500";
-    case "services":
-      return "bg-purple-500/20 text-purple-500";
     default:
       return "bg-gray-500/20 text-gray-500";
   }
@@ -261,7 +257,7 @@ export default function Merchants() {
                           </p>
                         )}
                         <div className="text-xs discord-text">
-                          Created By:{" COMMBANK "}
+                          Created By:{" GOVERNMENT "}
                           {formatDistanceToNow(new Date(merchant.createdAt), {
                             addSuffix: true,
                           })}

@@ -31,7 +31,6 @@ export default function Dashboard() {
         <Header
           title="Dashboard"
           description="Monitor CommBank bot transactions and user activity"
-          }}
         />
 
         <main className="flex-1 overflow-auto p-6">
