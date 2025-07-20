@@ -1,14 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { 
-  Bot, 
-  BarChart3, 
-  ArrowLeftRight, 
-  Wallet, 
-  Store, 
-  Terminal, 
+import {
+  Bot,
+  BarChart3,
+  ArrowLeftRight,
+  Wallet,
+  Store,
+  Terminal,
   Settings,
-  Circle
+  Circle,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,6 +17,7 @@ const navigation = [
   { name: "Transactions", href: "/transactions", icon: ArrowLeftRight },
   { name: "Balances", href: "/balances", icon: Wallet },
   { name: "Merchants", href: "/merchants", icon: Store },
+  { name: "Help", href: "/help", icon: Terminal },
   { name: "Commands", href: "/commands", icon: Terminal },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
@@ -30,17 +31,17 @@ export default function Sidebar() {
   });
 
   return (
-    <div className="w-64 discord-darker border-r border-gray-700 flex flex-col">
+    <div className="w-64 discord-darker border-r border-blue-700 flex flex-col">
       {/* Bot Header */}
-      <div className="p-6 border-b border-gray-700">
+      <div className="p-6 border-b border-blue-700">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 discord-primary rounded-full flex items-center justify-center">
             <Bot className="text-xl w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">GameBank Bot</h1>
+            <h1 className="text-lg font-semibold text-white">CommBank Bot</h1>
             <div className="flex items-center space-x-2">
-              <Circle className="w-2 h-2 fill-green-500 text-green-500" />
+              <Circle className="w-2 h-2 fill-blue-500 text-blue-500" />
               <span className="text-sm discord-text">Online</span>
             </div>
           </div>
@@ -60,7 +61,7 @@ export default function Sidebar() {
                       "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors cursor-pointer",
                       isActive
                         ? "discord-primary text-white"
-                        : "discord-text hover:text-white hover:bg-gray-700"
+                        : "discord-text hover:text-white hover:bg-blue-700",
                     )}
                   >
                     <item.icon className="w-4 h-4" />
@@ -74,7 +75,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bot Status */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-blue-700">
         <div className="text-xs discord-text mb-2">Server Status</div>
         <div className="space-y-1">
           <div className="flex justify-between text-sm">

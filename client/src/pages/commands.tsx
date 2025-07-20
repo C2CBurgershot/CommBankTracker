@@ -3,7 +3,14 @@ import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Terminal, Bot, Users, DollarSign, Store, ArrowRightLeft } from "lucide-react";
+import {
+  Terminal,
+  Bot,
+  Users,
+  DollarSign,
+  Store,
+  ArrowRightLeft,
+} from "lucide-react";
 
 const commands = [
   {
@@ -76,7 +83,9 @@ export default function Commands() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card className="discord-darker border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium discord-text">Bot Status</CardTitle>
+                <CardTitle className="text-sm font-medium discord-text">
+                  Bot Status
+                </CardTitle>
                 <Bot className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
@@ -87,33 +96,45 @@ export default function Commands() {
 
             <Card className="discord-darker border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium discord-text">Uptime</CardTitle>
+                <CardTitle className="text-sm font-medium discord-text">
+                  Uptime
+                </CardTitle>
                 <Terminal className="h-4 w-4 discord-text" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{botStatus?.uptime || "Loading..."}</div>
+                <div className="text-2xl font-bold text-white">
+                  {botStatus?.uptime || "Loading..."}
+                </div>
                 <p className="text-xs discord-text">Current session</p>
               </CardContent>
             </Card>
 
             <Card className="discord-darker border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium discord-text">Commands Today</CardTitle>
+                <CardTitle className="text-sm font-medium discord-text">
+                  Commands Today
+                </CardTitle>
                 <ArrowRightLeft className="h-4 w-4 text-[hsl(var(--discord-primary))]" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{botStatus?.commandsToday || "0"}</div>
+                <div className="text-2xl font-bold text-white">
+                  {botStatus?.commandsToday || "0"}
+                </div>
                 <p className="text-xs discord-text">Executed successfully</p>
               </CardContent>
             </Card>
 
             <Card className="discord-darker border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium discord-text">Available Commands</CardTitle>
+                <CardTitle className="text-sm font-medium discord-text">
+                  Available Commands
+                </CardTitle>
                 <Users className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{commands.length}</div>
+                <div className="text-2xl font-bold text-white">
+                  {commands.length}
+                </div>
                 <p className="text-xs discord-text">Slash commands</p>
               </CardContent>
             </Card>
@@ -127,7 +148,10 @@ export default function Commands() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {commands.map((command) => (
-                  <div key={command.name} className="p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors">
+                  <div
+                    key={command.name}
+                    className="p-4 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-[hsl(var(--discord-primary))]/20 text-[hsl(var(--discord-primary))] rounded-lg flex items-center justify-center">
@@ -137,12 +161,18 @@ export default function Commands() {
                           <div className="font-mono text-[hsl(var(--discord-primary))] font-medium">
                             {command.name}
                           </div>
-                          <div className="text-sm text-white">{command.description}</div>
+                          <div className="text-sm text-white">
+                            {command.description}
+                          </div>
                         </div>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={categories[command.category as keyof typeof categories]}
+                      <Badge
+                        variant="outline"
+                        className={
+                          categories[
+                            command.category as keyof typeof categories
+                          ]
+                        }
                       >
                         {command.category}
                       </Badge>
@@ -165,20 +195,36 @@ export default function Commands() {
             <CardContent>
               <div className="space-y-4">
                 <div className="bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm discord-text mb-2">Check your balance:</div>
-                  <div className="font-mono text-[hsl(var(--discord-primary))]">/balance</div>
+                  <div className="text-sm discord-text mb-2">
+                    Check your balance:
+                  </div>
+                  <div className="font-mono text-[hsl(var(--discord-primary))]">
+                    /balance
+                  </div>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm discord-text mb-2">Send money to another user:</div>
-                  <div className="font-mono text-[hsl(var(--discord-primary))]">/pay @username 25.50</div>
+                  <div className="text-sm discord-text mb-2">
+                    Send money to another user:
+                  </div>
+                  <div className="font-mono text-[hsl(var(--discord-primary))]">
+                    /pay @username 69.00
+                  </div>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm discord-text mb-2">Place an order:</div>
-                  <div className="font-mono text-[hsl(var(--discord-primary))]">/order "Burger Palace" 15.99 "Big Mac combo"</div>
+                  <div className="text-sm discord-text mb-2">
+                    Place an order:
+                  </div>
+                  <div className="font-mono text-[hsl(var(--discord-primary))]">
+                    /order "BURGERSHOT" 15.99 "Moneyshot combo"
+                  </div>
                 </div>
                 <div className="bg-gray-900 rounded-lg p-4">
-                  <div className="text-sm discord-text mb-2">View transaction history:</div>
-                  <div className="font-mono text-[hsl(var(--discord-primary))]">/history @username 10</div>
+                  <div className="text-sm discord-text mb-2">
+                    View transaction history:
+                  </div>
+                  <div className="font-mono text-[hsl(var(--discord-primary))]">
+                    /history @username 10
+                  </div>
                 </div>
               </div>
             </CardContent>

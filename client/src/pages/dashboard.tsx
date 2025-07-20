@@ -30,10 +30,7 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
           title="Dashboard"
-          description="Monitor your GameBank bot transactions and user activity"
-          action={{
-            label: "Add Merchant",
-            onClick: handleAddMerchant,
+          description="Monitor CommBank bot transactions and user activity"
           }}
         />
 
@@ -42,31 +39,37 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard
               title="Total Volume"
-              value={statsLoading ? "Loading..." : `$${stats?.totalVolume || "0.00"}`}
+              value={
+                statsLoading ? "Loading..." : `$${stats?.totalVolume || "0.00"}`
+              }
               icon={DollarSign}
-              iconColor="bg-green-500/20 text-green-500"
-              change={{ value: "12.5%", type: "positive" }}
+              iconColor="bg-green-500/90 text-white-500"
+              change={{ value: "0%", type: "positive" }}
             />
             <StatsCard
               title="Transactions"
-              value={statsLoading ? "Loading..." : stats?.totalTransactions || 0}
+              value={
+                statsLoading ? "Loading..." : stats?.totalTransactions || 0
+              }
               icon={ArrowLeftRight}
-              iconColor="bg-[hsl(var(--discord-primary))]/20 text-[hsl(var(--discord-primary))]"
-              change={{ value: "8.2%", type: "positive" }}
+              iconColor="bg-blue-500/90 text-white-500"
+              change={{ value: "0%", type: "positive" }}
             />
             <StatsCard
               title="Active Users"
               value={statsLoading ? "Loading..." : stats?.activeUsers || 0}
               icon={Users}
-              iconColor="bg-yellow-500/20 text-yellow-500"
-              change={{ value: "15.7%", type: "positive" }}
+              iconColor="bg-yellow-500/90 text-white-500"
+              change={{ value: "1%", type: "positive" }}
             />
             <StatsCard
               title="Failed Today"
-              value={statsLoading ? "Loading..." : stats?.failedTransactions || 0}
+              value={
+                statsLoading ? "Loading..." : stats?.failedTransactions || 0
+              }
               icon={AlertTriangle}
-              iconColor="bg-red-500/20 text-red-500"
-              change={{ value: "3.1%", type: "negative" }}
+              iconColor="bg-red-500/90 text-White-500"
+              change={{ value: "0%", type: "negative" }}
             />
           </div>
 
@@ -75,12 +78,12 @@ export default function Dashboard() {
             {/* Recent Transactions */}
             <div className="lg:col-span-2">
               {transactionsLoading ? (
-                <div className="discord-darker rounded-xl border border-gray-700 p-6">
+                <div className="discord-darker rounded-xl border border-blue-700 p-6">
                   <div className="animate-pulse">
-                    <div className="h-6 bg-gray-700 rounded w-48 mb-4"></div>
+                    <div className="h-6 bg-blue-700 rounded w-48 mb-4"></div>
                     <div className="space-y-3">
                       {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-12 bg-gray-700 rounded"></div>
+                        <div key={i} className="h-12 bg-blue-700 rounded"></div>
                       ))}
                     </div>
                   </div>
